@@ -1,0 +1,93 @@
+name: Manual Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      java_version:
+        description: 'Java version to use for building'
+        required: true
+        default: '21'
+        type: choice
+        options:
+          - '17'
+          - '21'
+      build_type:
+        description: 'Type of build to perform'
+        required: true
+        default: 'release'
+        type: choice
+        options:
+          - 'release'
+          - 'debug'
+      publish_release:
+        description: 'Publish to GitHub Releases?'
+        required: true
+        default: 'false'
+        type: boolean
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate Gradle wrapper
+        uses: gradle/actions/wrapper-validation@v3
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ inputs.java_version }}
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Make Gradle wrapper executable
+        run: chmod +x ./gradlew
+
+      - name: Build with Gradle
+        run: |
+          if [ "${{ inputs.build_type }}" == "release" ]; then
+            ./gradlew build
+          else
+            ./gradlew build -Pdebug
+          fi
+
+      - name: Get version
+        id: get_version
+        run: |
+          VERSION=$(grep 'mod_version' gradle.properties | cut -d'=' -f2 | tr -d ' ')
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: song-player-${{ env.VERSION }}-artifacts
+          path: |
+            build/libs/
+            !build/libs/*-sources.jar
+          retention-days: 30
+
+      - name: Create GitHub Release
+        if: ${{ inputs.publish_release == true }}
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ env.VERSION }}
+          release_name: Release v${{ env.VERSION }}
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Assets
+        if: ${{ inputs.publish_release == true }}
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: build/libs/song-player-${{ env.VERSION }}.jar
+          asset_name: song-player-${{ env.VERSION }}.jar
+          asset_content_type: application/java-archive
