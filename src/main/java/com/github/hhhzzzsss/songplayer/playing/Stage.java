@@ -43,7 +43,7 @@ public class Stage {
 		// Information tracked for checking cleanup conditions
 		worldName = Util.getWorldName();
 		serverIdentifier = Util.getServerIdentifier();
-		System.out.println("Server identifier: " + serverIdentifier);
+		System.out.println("服务器标识符: " + serverIdentifier);
 	}
 
 	public void movePlayerToStagePosition() {
@@ -259,7 +259,7 @@ public class Stage {
 		}
 		public void giveInstrumentSummary() {
 			Util.showChatMessage("§c------------------------------");
-			Util.showChatMessage("§cMissing instruments required to play song:");
+			Util.showChatMessage("§c缺少播放歌曲所需的乐器:");
 			for (int instrumentId = 0; instrumentId < 16; instrumentId++) {
 				if (requiredInstruments[instrumentId] > 0) {
 					Instrument instrument = Instrument.getInstrumentFromId(instrumentId);

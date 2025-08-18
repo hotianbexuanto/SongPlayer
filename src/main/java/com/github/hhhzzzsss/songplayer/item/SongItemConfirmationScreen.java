@@ -19,11 +19,11 @@ public class SongItemConfirmationScreen extends Screen {
     private MultilineText loadedText;
     private boolean loaded = false;
 
-    private static final Text CONFIRM = Text.literal("Play");
-    private static final Text CANCEL = Text.literal("Cancel");
+    private static final Text CONFIRM = Text.literal("播放");
+    private static final Text CANCEL = Text.literal("取消");
 
     public SongItemConfirmationScreen(ItemStack stack) throws IOException, IllegalArgumentException {
-        super(Text.literal("Use song item"));
+        super(Text.literal("使用歌曲物品"));
         this.stack = stack;
         this.loaderThread = new SongItemLoaderThread(stack);
         this.loaderThread.start();
@@ -32,7 +32,7 @@ public class SongItemConfirmationScreen extends Screen {
     @Override
     protected void init() {
         super.init();
-        String unloadedMessage = "§7Loading song...";
+        String unloadedMessage = "§7正在加载歌曲...";
         this.unloadedText = MultilineText.create(this.textRenderer, Text.literal(unloadedMessage));
     }
 
@@ -57,15 +57,15 @@ public class SongItemConfirmationScreen extends Screen {
 
         if (!loaderThread.isAlive()) {
             if (loaderThread.exception != null) {
-                Util.showChatMessage("§cError loading song item: §4" + loaderThread.exception.getMessage());
+                Util.showChatMessage("§c加载歌曲物品时出错: §4" + loaderThread.exception.getMessage());
                 this.client.setScreen(null);
                 return;
             }
             else if (loadedText == null) {
                 String[] loadedMessages = {
                         "§3" + loaderThread.song.name,
-                        String.format("§7Max notes per second: %s%d", getNumberColor(loaderThread.maxNotesPerSecond), loaderThread.maxNotesPerSecond),
-                        String.format("§7Avg notes per second: %s%.2f", getNumberColor(loaderThread.avgNotesPerSecond), loaderThread.avgNotesPerSecond),
+                        String.format("§7每秒最大音符数: %s%d", getNumberColor(loaderThread.maxNotesPerSecond), loaderThread.maxNotesPerSecond),
+                        String.format("§7每秒平均音符数: %s%.2f", getNumberColor(loaderThread.avgNotesPerSecond), loaderThread.avgNotesPerSecond),
                 };
                 Text[] messageList = Arrays.stream(loadedMessages).map(Text::literal).toArray(Text[]::new);
                 this.loadedText = MultilineText.create(this.textRenderer, messageList);

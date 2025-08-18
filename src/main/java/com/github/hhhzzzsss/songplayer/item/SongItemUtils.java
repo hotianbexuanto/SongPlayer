@@ -32,14 +32,14 @@ public class SongItemUtils {
         getSongItemTag(stack).ifPresent((songItemTag) -> {
             String name = songItemTag.getString(DISPLAY_NAME_KEY)
                     .or(() -> songItemTag.getString(FILE_NAME_KEY))
-                    .orElse("unnamed");
+                    .orElse("未命名");
             Util.setItemName(stack,
                     Util.getStyledText(name, Style.EMPTY.withColor(Formatting.DARK_AQUA).withItalic(false))
             );
             Util.setItemLore(stack,
-                    Util.getStyledText("Song Item", Style.EMPTY.withColor(Formatting.YELLOW).withItalic(false)),
-                    Util.getStyledText("Right click to play", Style.EMPTY.withColor(Formatting.AQUA).withItalic(false)),
-                    Util.getStyledText("Requires SongPlayer 3.0+", Style.EMPTY.withColor(Formatting.GOLD).withItalic(false)),
+                    Util.getStyledText("歌曲物品", Style.EMPTY.withColor(Formatting.YELLOW).withItalic(false)),
+                    Util.getStyledText("右键点击播放", Style.EMPTY.withColor(Formatting.AQUA).withItalic(false)),
+                    Util.getStyledText("需要 SongPlayer 3.0+", Style.EMPTY.withColor(Formatting.GOLD).withItalic(false)),
                     Util.getStyledText("https://github.com/hhhzzzsss/SongPlayer", Style.EMPTY.withColor(Formatting.GRAY).withItalic(false))
             );
         });

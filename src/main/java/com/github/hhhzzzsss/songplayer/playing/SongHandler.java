@@ -66,15 +66,15 @@ public class SongHandler {
                 if (!playlistChecked) {
                     playlistChecked = true;
                     if (currentPlaylist.songsFailedToLoad.size() > 0) {
-                        Util.showChatMessage("§cFailed to load the following songs from the playlist: §4" + String.join(" ", currentPlaylist.songsFailedToLoad));
+                        Util.showChatMessage("§c无法从播放列表加载以下歌曲: §4" + String.join(" ", currentPlaylist.songsFailedToLoad));
                     }
                 }
                 Song nextSong = currentPlaylist.getNext();
                 if (currentPlaylist.songs.size() == 0) {
-                    Util.showChatMessage("§cPlaylist has no playable songs");
+                    Util.showChatMessage("§c播放列表没有可播放的歌曲");
                     currentPlaylist = null;
                 } else if (nextSong == null) {
-                    Util.showChatMessage("§6Playlist has finished playing");
+                    Util.showChatMessage("§6播放列表已播放完毕");
                     currentPlaylist = null;
                 } else {
                     nextSong.reset();
@@ -90,7 +90,7 @@ public class SongHandler {
             // Check if loader thread is finished and handle accordingly
             if (loaderThread != null && !loaderThread.isAlive()) {
                 if (loaderThread.exception != null) {
-                    Util.showChatMessage("§cFailed to load song: §4" + loaderThread.exception.getMessage());
+                    Util.showChatMessage("§c加载歌曲失败: §4" + loaderThread.exception.getMessage());
                 } else {
                     if (currentSong == null) {
                         setSong(loaderThread.song);
@@ -136,7 +136,7 @@ public class SongHandler {
         else if (currentSong != null) {
             // This should never happen, but I left this check in just in case.
             if (stage == null) {
-                Util.showChatMessage("§cStage is null! This should not happen!");
+                Util.showChatMessage("§c舞台为空！这不应该发生！");
                 reset();
                 return;
             }
@@ -168,28 +168,28 @@ public class SongHandler {
 
     public void loadSong(String location) {
         if (loaderThread != null) {
-            Util.showChatMessage("§cAlready loading a song, cannot load another");
+            Util.showChatMessage("§c正在加载歌曲，无法加载另一首");
         }
         else if (currentPlaylist != null) {
-            Util.showChatMessage("§cCannot load a song while a playlist is playing");
+            Util.showChatMessage("§c播放列表正在播放时无法加载歌曲");
         }
         else {
             try {
                 loaderThread = new SongLoaderThread(location);
-                Util.showChatMessage("§6Loading §3" + location);
+                Util.showChatMessage("§6正在加载 §3" + location);
                 loaderThread.start();
             } catch (IOException e) {
-                Util.showChatMessage("§cFailed to load song: §4" + e.getMessage());
+                Util.showChatMessage("§c加载歌曲失败: §4" + e.getMessage());
             }
         }
     }
 
     public void loadSong(SongLoaderThread thread) {
         if (loaderThread != null) {
-            Util.showChatMessage("§cAlready loading a song, cannot load another");
+            Util.showChatMessage("§c正在加载歌曲，无法加载另一首");
         }
         else if (currentPlaylist != null) {
-            Util.showChatMessage("§cCannot load a song while a playlist is playing");
+            Util.showChatMessage("§c播放列表正在播放时无法加载歌曲");
         }
         else {
             loaderThread = thread;
@@ -207,17 +207,17 @@ public class SongHandler {
         }
         if (!Config.getConfig().survivalOnly) getAndSaveBuildSlot();
         prepareStage();
-        Util.showChatMessage("§6Building noteblocks");
+        Util.showChatMessage("§6正在构建音符盒");
     }
 
     private void queueSong(Song song) {
         songQueue.add(song);
-        Util.showChatMessage("§6Added song to queue: §3" + song.name);
+        Util.showChatMessage("§6已将歌曲添加到队列: §3" + song.name);
     }
 
     public void setPlaylist(Path playlist) {
         if (loaderThread != null || currentSong != null || !songQueue.isEmpty()) {
-            Util.showChatMessage("§cCannot start playing a playlist while something else is playing");
+            Util.showChatMessage("§c在播放其他内容时无法开始播放播放列表");
         }
         else {
             currentPlaylist = new Playlist(playlist, Config.getConfig().loopPlaylists, Config.getConfig().shufflePlaylists);
@@ -335,19 +335,19 @@ public class SongHandler {
     }
     private void setBuildProgressDisplay() {
         MutableText buildText = Text.empty()
-                .append(Text.literal("Building noteblocks | " ).formatted(Formatting.GOLD))
+                .append(Text.literal("正在构建音符盒 | " ).formatted(Formatting.GOLD))
                 .append(Text.literal((stage.totalMissingNotes - stage.missingNotes.size()) + "/" + stage.totalMissingNotes).formatted(Formatting.DARK_AQUA));
         MutableText playlistText = Text.empty();
         if (currentPlaylist != null && currentPlaylist.loaded) {
-            playlistText = playlistText.append(Text.literal("Playlist: ").formatted(Formatting.GOLD))
+            playlistText = playlistText.append(Text.literal("播放列表: ").formatted(Formatting.GOLD))
                     .append(Text.literal(currentPlaylist.name).formatted(Formatting.BLUE))
                     .append(Text.literal(" | ").formatted(Formatting.GOLD))
                     .append(Text.literal(String.format(" (%s/%s)", currentPlaylist.songNumber, currentPlaylist.songs.size())).formatted(Formatting.DARK_AQUA));
             if (currentPlaylist.loop) {
-                playlistText.append(Text.literal(" | Looping").formatted(Formatting.GOLD));
+                playlistText.append(Text.literal(" | 循环播放").formatted(Formatting.GOLD));
             }
             if (currentPlaylist.shuffle) {
-                playlistText.append(Text.literal(" | Shuffled").formatted(Formatting.GOLD));
+                playlistText.append(Text.literal(" | 随机播放").formatted(Formatting.GOLD));
             }
         }
         ProgressDisplay.getInstance().setText(buildText, playlistText);
@@ -373,7 +373,7 @@ public class SongHandler {
                     try {
                         stage.checkSurvivalBuildStatus(currentSong);
                     } catch (Stage.NotEnoughInstrumentsException e) {
-                        Util.showChatMessage("§6Stopped because stage is missing instruments required for song.");
+                        Util.showChatMessage("§6已停止，因为舞台缺少歌曲所需的乐器。");
                         restoreStateAndReset();
                         return;
                     }
@@ -392,7 +392,7 @@ public class SongHandler {
                     System.out.println("Missing note: " + Instrument.getInstrumentFromId(instrumentId).name() + ":" + pitch);
                 }
                 if (!Config.getConfig().survivalOnly) getAndSaveBuildSlot();
-                Util.showChatMessage("§6Stage was altered. Rebuilding!");
+                Util.showChatMessage("§6舞台已被更改。正在重新构建！");
                 return;
             }
         }
@@ -416,7 +416,7 @@ public class SongHandler {
         }
 
         if (currentSong.finished()) {
-            Util.showChatMessage("§6Done playing §3" + currentSong.name);
+            Util.showChatMessage("§6已完成播放 §3" + currentSong.name);
             currentSong = null;
         }
     }
@@ -424,15 +424,15 @@ public class SongHandler {
         long currentTime = Math.min(currentSong.time, currentSong.length);
         long totalTime = currentSong.length;
         MutableText songText = Text.empty()
-                .append(Text.literal("Now playing: ").formatted(Formatting.GOLD))
+                .append(Text.literal("正在播放: ").formatted(Formatting.GOLD))
                 .append(Text.literal(currentSong.name).formatted(Formatting.BLUE))
                 .append(Text.literal(" | ").formatted(Formatting.GOLD))
                 .append(Text.literal(String.format("%s/%s", Util.formatTime(currentTime), Util.formatTime(totalTime))).formatted(Formatting.DARK_AQUA));
         if (currentSong.looping) {
             if (currentSong.loopCount > 0) {
-                songText.append(Text.literal(String.format(" | Loop (%d/%d)", currentSong.currentLoop, currentSong.loopCount)).formatted(Formatting.GOLD));
+                songText.append(Text.literal(String.format(" | 循环 (%d/%d)", currentSong.currentLoop, currentSong.loopCount)).formatted(Formatting.GOLD));
             } else {
-                songText.append(Text.literal(" | Looping enabled").formatted(Formatting.GOLD));
+                songText.append(Text.literal(" | 已启用循环播放").formatted(Formatting.GOLD));
             }
         }
         MutableText playlistText = Text.empty();
@@ -479,9 +479,9 @@ public class SongHandler {
                 int cleanupHash = 31 * cleanupBreakList.hashCode() + cleanupPlaceList.hashCode();
                 if (cleanupHash == lastCleanupHash) { // If loop is detected, stop
                     cleaningUp = false;
-                    Util.showChatMessage("§6Stopped restoring original blocks due to infinite loop being detected");
+                    Util.showChatMessage("§6由于检测到无限循环，已停止恢复原始方块");
                     if (!cleanupUnplaceableBlocks.isEmpty()) {
-                        Util.showChatMessage(String.format("§3%d §6blocks could not be restored", cleanupUnplaceableBlocks.size()));
+                        Util.showChatMessage(String.format("§3%d §6个方块无法恢复", cleanupUnplaceableBlocks.size()));
                     }
                     return;
                 } else {
@@ -519,9 +519,9 @@ public class SongHandler {
         } else {
             originalBlocks.clear();
             cleaningUp = false;
-            Util.showChatMessage("§6Finished restoring original blocks");
+            Util.showChatMessage("§6已完成恢复原始方块");
             if (!cleanupUnplaceableBlocks.isEmpty()) {
-                Util.showChatMessage(String.format("§3%d §6blocks could not be restored", cleanupUnplaceableBlocks.size()));
+                Util.showChatMessage(String.format("§3%d §6个方块无法恢复", cleanupUnplaceableBlocks.size()));
             }
         }
     }
@@ -653,7 +653,7 @@ public class SongHandler {
     }
     private void setCleanupProgressDisplay() {
         MutableText buildText = Text.empty()
-                .append(Text.literal("Rebuilding original blocks | " ).formatted(Formatting.GOLD))
+                .append(Text.literal("正在恢复原始方块 | " ).formatted(Formatting.GOLD))
                 .append(Text.literal((cleanupTotalBlocksToPlace - cleanupPlaceList.size()) + "/" + cleanupTotalBlocksToPlace).formatted(Formatting.DARK_AQUA));
         ProgressDisplay.getInstance().setText(buildText, Text.empty());
     }

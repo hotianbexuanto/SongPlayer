@@ -80,7 +80,7 @@ public class CommandProcessor {
 			String args = parts.length>1 ? parts[1] : "";
 			Command c = commandMap.get(name.toLowerCase(Locale.ROOT));
 			if (c == null) {
-				Util.showChatMessage("§cUnrecognized command");
+				Util.showChatMessage("§c无法识别的命令");
 			} else {
 				try {
 					boolean success = c.processCommand(args);
@@ -101,7 +101,7 @@ public class CommandProcessor {
 				}
 				catch (Throwable e) {
 					e.printStackTrace();
-					Util.showChatMessage("§cAn error occurred while running this command: §4" + e.getMessage());
+					Util.showChatMessage("§c执行此命令时发生错误: §4" + e.getMessage());
 				}
 			}
 			return true;
@@ -131,11 +131,11 @@ public class CommandProcessor {
 			return new String[]{"[command]"};
 		}
 		public String getDescription() {
-			return "Lists commands or explains command";
+			return "列出命令或解释命令";
 		}
 		public boolean processCommand(String args) {
 			if (args.length() == 0) {
-				StringBuilder helpMessage = new StringBuilder("§6Commands -");
+				StringBuilder helpMessage = new StringBuilder("§6命令 -");
 				for (Command c : commands) {
 					helpMessage.append(" " + Config.getConfig().prefix + c.getName());
 				}
@@ -145,25 +145,25 @@ public class CommandProcessor {
 				if (commandMap.containsKey(args.toLowerCase(Locale.ROOT))) {
 					Command c = commandMap.get(args.toLowerCase(Locale.ROOT));
 					Util.showChatMessage("§6------------------------------");
-					Util.showChatMessage("§6Help: §3" + c.getName());
-					Util.showChatMessage("§6Description: §3" + c.getDescription());
+					Util.showChatMessage("§6帮助: §3" + c.getName());
+					Util.showChatMessage("§6描述: §3" + c.getDescription());
 					if (c.getSyntax().length == 0) {
-						Util.showChatMessage("§6Usage: §3" + Config.getConfig().prefix + c.getName());
+						Util.showChatMessage("§6用法: §3" + Config.getConfig().prefix + c.getName());
 					}
 					else if (c.getSyntax().length == 1) {
-						Util.showChatMessage("§6Usage: §3" + Config.getConfig().prefix + c.getName() + " " + c.getSyntax()[0]);
+						Util.showChatMessage("§6用法: §3" + Config.getConfig().prefix + c.getName() + " " + c.getSyntax()[0]);
 					} else {
-						Util.showChatMessage("§6Usage:");
+						Util.showChatMessage("§6用法:");
 						for (String syntax : c.getSyntax()) {
 							Util.showChatMessage("    §3" + Config.getConfig().prefix + c.getName() + " " + syntax);
 						}
 					}
 					if (c.getAliases().length > 0) {
-						Util.showChatMessage("§6Aliases: §3" + String.join(", ", c.getAliases()));
+						Util.showChatMessage("§6别名: §3" + String.join(", ", c.getAliases()));
 					}
 					Util.showChatMessage("§6------------------------------");
 				} else {
-					Util.showChatMessage("§cCommand not recognized: " + args);
+					Util.showChatMessage("§c无法识别的命令: " + args);
 				}
 			}
 			return true;
@@ -184,20 +184,20 @@ public class CommandProcessor {
 			return new String[]{"<prefix>"};
 		}
 		public String getDescription() {
-			return "Sets the command prefix used by SongPlayer";
+			return "设置SongPlayer使用的命令前缀";
 		}
 		public boolean processCommand(String args) {
 			if (args.contains(" ")) {
-				Util.showChatMessage("§cPrefix cannot contain a space");
+				Util.showChatMessage("§c前缀不能包含空格");
 				return true;
 			}
 			else if (args.startsWith("/")) {
-				Util.showChatMessage("§cPrefix cannot start with a /");
+				Util.showChatMessage("§c前缀不能以/开头");
 				return true;
 			}
 			else if (args.length() > 0) {
 				Config.getConfig().prefix = args;
-				Util.showChatMessage("§6Set prefix to " + args);
+				Util.showChatMessage("§6已将前缀设置为 " + args);
 				Config.saveConfigWithErrorHandling();
 				return true;
 			}
@@ -215,12 +215,12 @@ public class CommandProcessor {
 			return new String[]{"<song or url>"};
 		}
 		public String getDescription() {
-			return "Plays a song";
+			return "播放一首歌曲";
 		}
 		public boolean processCommand(String args) {
 			if (args.length() > 0) {
 				if (Config.getConfig().survivalOnly && SongPlayer.MC.interactionManager.getCurrentGameMode() != GameMode.SURVIVAL) {
-					Util.showChatMessage("§cTo play in survival only mode, you must be in survival mode to start with.");
+					Util.showChatMessage("§c要在仅生存模式下播放，您必须首先处于生存模式。");
 					return true;
 				}
 
@@ -244,23 +244,23 @@ public class CommandProcessor {
 			return new String[0];
 		}
 		public String getDescription() {
-			return "Stops playing";
+			return "停止播放";
 		}
 		public boolean processCommand(String args) {
 			if (SongHandler.getInstance().isIdle()) {
-				Util.showChatMessage("§6No song is currently playing");
+				Util.showChatMessage("§6当前没有歌曲在播放");
 				return true;
 			}
 			if (args.length() == 0) {
 				if (SongHandler.getInstance().cleaningUp) {
 					SongHandler.getInstance().restoreStateAndReset();
-					Util.showChatMessage("§6Stopped cleanup");
+					Util.showChatMessage("§6已停止清理");
 				} else if (Config.getConfig().autoCleanup && SongHandler.getInstance().originalBlocks.size() != 0) {
 					SongHandler.getInstance().partialResetAndCleanup();
-					Util.showChatMessage("§6Stopped playing and switched to cleanup");
+					Util.showChatMessage("§6已停止播放并切换到清理模式");
 				} else {
 					SongHandler.getInstance().restoreStateAndReset();
-					Util.showChatMessage("§6Stopped playing");
+					Util.showChatMessage("§6已停止播放");
 				}
 				return true;
 			}
@@ -278,11 +278,11 @@ public class CommandProcessor {
 			return new String[0];
 		}
 		public String getDescription() {
-			return "Skips current song";
+			return "跳过当前歌曲";
 		}
 		public boolean processCommand(String args) {
 			if (SongHandler.getInstance().currentSong == null) {
-				Util.showChatMessage("§6No song is currently playing");
+				Util.showChatMessage("§6当前没有歌曲在播放");
 				return true;
 			}
 			if (args.length() == 0) {
@@ -303,11 +303,11 @@ public class CommandProcessor {
 			return new String[]{"<mm:ss>"};
 		}
 		public String getDescription() {
-			return "Goes to a specific time in the song";
+			return "跳转到歌曲的特定时间点";
 		}
 		public boolean processCommand(String args) {
 			if (SongHandler.getInstance().currentSong == null) {
-				Util.showChatMessage("§6No song is currently playing");
+				Util.showChatMessage("§6当前没有歌曲在播放");
 				return true;
 			}
 
@@ -315,10 +315,10 @@ public class CommandProcessor {
 				try {
 					long time = Util.parseTime(args);
 					SongHandler.getInstance().currentSong.setTime(time);
-					Util.showChatMessage("§6Set song time to §3" + Util.formatTime(time));
+					Util.showChatMessage("§6已将歌曲时间设置为 §3" + Util.formatTime(time));
 					return true;
 				} catch (IOException e) {
-					Util.showChatMessage("§cNot a valid time stamp");
+					Util.showChatMessage("§c时间戳无效");
 					return false;
 				}
 			}
@@ -336,21 +336,21 @@ public class CommandProcessor {
 			return new String[0];
 		}
 		public String getDescription() {
-			return "Toggles song looping";
+			return "切换歌曲循环播放";
 		}
 		public boolean processCommand(String args) {
 			if (SongHandler.getInstance().currentSong == null) {
-				Util.showChatMessage("§6No song is currently playing");
+				Util.showChatMessage("§6当前没有歌曲在播放");
 				return true;
 			}
 
 			SongHandler.getInstance().currentSong.looping = !SongHandler.getInstance().currentSong.looping;
 			SongHandler.getInstance().currentSong.loopCount = 0;
 			if (SongHandler.getInstance().currentSong.looping) {
-				Util.showChatMessage("§6Enabled looping");
+				Util.showChatMessage("§6已启用循环播放");
 			}
 			else {
-				Util.showChatMessage("§6Disabled looping");
+				Util.showChatMessage("§6已禁用循环播放");
 			}
 			return true;
 		}
@@ -367,18 +367,18 @@ public class CommandProcessor {
 			return new String[0];
 		}
 		public String getDescription() {
-			return "Gets the status of the song that is currently playing";
+			return "获取当前播放歌曲的状态";
 		}
 		public boolean processCommand(String args) {
 			if (args.length() == 0) {
 				if (SongHandler.getInstance().currentSong == null) {
-					Util.showChatMessage("§6No song is currently playing");
+					Util.showChatMessage("§6当前没有歌曲在播放");
 					return true;
 				}
 				Song currentSong = SongHandler.getInstance().currentSong;
 				long currentTime = Math.min(currentSong.time, currentSong.length);
 				long totalTime = currentSong.length;
-				Util.showChatMessage(String.format("§6Currently playing %s §3(%s/%s)", currentSong.name, Util.formatTime(currentTime), Util.formatTime(totalTime)));
+				Util.showChatMessage(String.format("§6正在播放 %s §3(%s/%s)", currentSong.name, Util.formatTime(currentTime), Util.formatTime(totalTime)));
 				return true;
 			}
 			else {
@@ -398,18 +398,18 @@ public class CommandProcessor {
 			return new String[0];
 		}
 		public String getDescription() {
-			return "Shows the current song queue";
+			return "显示当前歌曲队列";
 		}
 		public boolean processCommand(String args) {
 			if (args.length() == 0) {
 				if (SongHandler.getInstance().currentSong == null && SongHandler.getInstance().songQueue.isEmpty()) {
-					Util.showChatMessage("§6No song is currently playing");
+					Util.showChatMessage("§6当前没有歌曲在播放");
 					return true;
 				}
 
 				Util.showChatMessage("§6------------------------------");
 				if (SongHandler.getInstance().currentSong != null) {
-					Util.showChatMessage("§6Current song: §3" + SongHandler.getInstance().currentSong.name);
+					Util.showChatMessage("§6当前歌曲: §3" + SongHandler.getInstance().currentSong.name);
 				}
 				int index = 0;
 				for (Song song : SongHandler.getInstance().songQueue) {
@@ -438,7 +438,7 @@ public class CommandProcessor {
 					"<subdirectory>"};
 		}
 		public String getDescription() {
-			return "Lists available songs. If an argument is provided, lists all songs in the subdirectory.";
+			return "列出可用的歌曲。如果提供了参数，则列出子目录中的所有歌曲。";
 		}
 		public boolean processCommand(String args) {
 			if (!args.contains(" ")) {
@@ -449,7 +449,7 @@ public class CommandProcessor {
 				else {
 					dir = SongPlayer.SONG_DIR.resolve(args);
 					if (!Files.isDirectory(dir)) {
-						Util.showChatMessage("§cDirectory not found");
+						Util.showChatMessage("§c未找到目录");
 						return true;
 					}
 				}
@@ -470,21 +470,21 @@ public class CommandProcessor {
 							.collect(Collectors.toList());
 				}
 				catch (IOException e) {
-					Util.showChatMessage("§cError reading folder: §4" + e.getMessage());
+					Util.showChatMessage("§c读取文件夹时出错: §4" + e.getMessage());
 					return true;
 				}
 
 				if (subdirectories.size() == 0 && songs.size() == 0) {
-					Util.showChatMessage("§bNo songs found. You can put midi or nbs files in the §3.minecraft/songs §6folder.");
+					Util.showChatMessage("§b未找到歌曲。您可以将midi或nbs文件放在 §3.minecraft/songs §6文件夹中。");
 				}
 				else {
 					Util.showChatMessage("§6----------------------------------------");
-					Util.showChatMessage("§eContents of .minecraft/songs/" + args);
+					Util.showChatMessage("§e.minecraft/songs/" + args + " 的内容");
 					if (subdirectories.size() > 0) {
-						Util.showChatMessage("§6Subdirectories: §3" + String.join(" ", subdirectories));
+						Util.showChatMessage("§6子目录: §3" + String.join(" ", subdirectories));
 					}
 					if (songs.size() > 0) {
-						Util.showChatMessage("§6Songs: §7" + String.join(", ", songs));
+						Util.showChatMessage("§6歌曲: §7" + String.join(", ", songs));
 					}
 					Util.showChatMessage("§6----------------------------------------");
 				}
@@ -517,7 +517,7 @@ public class CommandProcessor {
 			};
 		}
 		public String getDescription() {
-			return "Configures playlists";
+			return "配置播放列表";
 		}
 		public boolean processCommand(String args) {
 			String[] split = args.split(" ");
@@ -533,7 +533,7 @@ public class CommandProcessor {
 					case "play": {
 						if (split.length != 2) return false;
 						if (!Files.exists(playlistDir)) {
-							Util.showChatMessage("§cPlaylist does not exist");
+							Util.showChatMessage("§c播放列表不存在");
 							return true;
 						}
 						SongHandler.getInstance().setPlaylist(playlistDir);
@@ -541,18 +541,18 @@ public class CommandProcessor {
 					}
 					case "create": {
 						if (split.length > 2) {
-							Util.showChatMessage("§cCannot have spaces in playlist name");
+							Util.showChatMessage("§c播放列表名称中不能包含空格");
 							return true;
 						}
 						if (split.length != 2) return false;
 						Playlist.createPlaylist(split[1]);
-						Util.showChatMessage(String.format("§6Created playlist §3%s", split[1]));
+						Util.showChatMessage(String.format("§6已创建播放列表 §3%s", split[1]));
 						return true;
 					}
 					case "delete": {
 						if (split.length != 2) return false;
 						Playlist.deletePlaylist(playlistDir);
-						Util.showChatMessage(String.format("§6Deleted playlist §3%s", split[1]));
+						Util.showChatMessage(String.format("§6已删除播放列表 §3%s", split[1]));
 						return true;
 					}
 					case "list": {
@@ -564,9 +564,9 @@ public class CommandProcessor {
 									.map(Path::toString)
 									.collect(Collectors.toList());
 							if (playlists.size() == 0) {
-								Util.showChatMessage("§6No playlists found");
+								Util.showChatMessage("§6未找到播放列表");
 							} else {
-								Util.showChatMessage("§6Playlists: §3" + String.join(", ", playlists));
+								Util.showChatMessage("§6播放列表: §3" + String.join(", ", playlists));
 							}
 							return true;
 						}
@@ -584,14 +584,14 @@ public class CommandProcessor {
 						if (split.length < 3) return false;
 						String location = String.join(" ", Arrays.copyOfRange(split, 2, split.length));
 						Playlist.addSong(playlistDir, SongPlayer.SONG_DIR.resolve(location));
-						Util.showChatMessage(String.format("§6Added §3%s §6to §3%s", location, split[1]));
+						Util.showChatMessage(String.format("§6已将 §3%s §6添加到 §3%s", location, split[1]));
 						return true;
 					}
 					case "removesong": {
 						if (split.length < 3) return false;
 						String location = String.join(" ", Arrays.copyOfRange(split, 2, split.length));
 						Playlist.removeSong(playlistDir, location);
-						Util.showChatMessage(String.format("§6Removed §3%s §6from §3%s", location, split[1]));
+						Util.showChatMessage(String.format("§6已从 §3%s §6中移除 §3%s", location, split[1]));
 						return true;
 					}
 					case "renamesong": {
@@ -602,11 +602,11 @@ public class CommandProcessor {
 							index = Integer.parseInt(split[2]);
 						}
 						catch (Exception e) {
-							Util.showChatMessage(String.format("§cIndex must be an integer"));
+							Util.showChatMessage(String.format("§c索引必须是整数"));
 							return true;
 						}
 						String oldName = Playlist.renameSong(playlistDir, index-1, location);
-						Util.showChatMessage(String.format("§6Renamed §3%s §6to §3%s", oldName, location));
+						Util.showChatMessage(String.format("§6已将 §3%s §6重命名为 §3%s", oldName, location));
 						return true;
 					}
 					case "loop": {
@@ -614,9 +614,9 @@ public class CommandProcessor {
 						Config.getConfig().loopPlaylists = !Config.getConfig().loopPlaylists;
 						SongHandler.getInstance().setPlaylistLoop(Config.getConfig().loopPlaylists);
 						if (Config.getConfig().loopPlaylists) {
-							Util.showChatMessage("§6Enabled playlist looping");
+							Util.showChatMessage("§6已启用播放列表循环");
 						} else {
-							Util.showChatMessage("§6Disabled playlist looping");
+							Util.showChatMessage("§6已禁用播放列表循环");
 						}
 						Config.saveConfigWithErrorHandling();
 						return true;
@@ -626,9 +626,9 @@ public class CommandProcessor {
 						Config.getConfig().shufflePlaylists = !Config.getConfig().shufflePlaylists;
 						SongHandler.getInstance().setPlaylistShuffle(Config.getConfig().shufflePlaylists);
 						if (Config.getConfig().shufflePlaylists) {
-							Util.showChatMessage("§6Enabled playlist shuffling");
+							Util.showChatMessage("§6已启用播放列表随机播放");
 						} else {
-							Util.showChatMessage("§6Disabled playlist shuffling");
+							Util.showChatMessage("§6已禁用播放列表随机播放");
 						}
 						Config.saveConfigWithErrorHandling();
 						return true;
@@ -728,7 +728,7 @@ public class CommandProcessor {
 			return new String[]{"<command>"};
 		}
 		public String getDescription() {
-			return "Sets the command used to go into creative mode";
+			return "设置用于进入创造模式的命令";
 		}
 		public boolean processCommand(String args) {
 			if (args.length() > 0) {
@@ -737,7 +737,7 @@ public class CommandProcessor {
 				} else {
 					Config.getConfig().creativeCommand = args;
 				}
-				Util.showChatMessage("§6Set creative command to §3/" + Config.getConfig().creativeCommand);
+				Util.showChatMessage("§6已将创造模式命令设置为 §3/" + Config.getConfig().creativeCommand);
 				Config.saveConfigWithErrorHandling();
 				return true;
 			}
@@ -758,7 +758,7 @@ public class CommandProcessor {
 			return new String[]{"<command>"};
 		}
 		public String getDescription() {
-			return "Sets the command used to go into survival mode";
+			return "设置用于进入生存模式的命令";
 		}
 		public boolean processCommand(String args) {
 			if (args.length() > 0) {
@@ -767,7 +767,7 @@ public class CommandProcessor {
 				} else {
 					Config.getConfig().survivalCommand = args;
 				}
-				Util.showChatMessage("§6Set survival command to §3/" + Config.getConfig().survivalCommand);
+				Util.showChatMessage("§6已将生存模式命令设置为 §3/" + Config.getConfig().survivalCommand);
 				Config.saveConfigWithErrorHandling();
 				return true;
 			}
@@ -788,13 +788,13 @@ public class CommandProcessor {
 			return new String[0];
 		}
 		public String getDescription() {
-			return "Switches to using essentials gamemode commands";
+			return "切换到使用Essentials游戏模式命令";
 		}
 		public boolean processCommand(String args) {
 			if (args.length() == 0) {
 				Config.getConfig().creativeCommand = "gmc";
 				Config.getConfig().survivalCommand = "gms";
-				Util.showChatMessage("§6Now using essentials gamemode commands");
+				Util.showChatMessage("§6现在使用Essentials游戏模式命令");
 				Config.saveConfigWithErrorHandling();
 				return true;
 			}
@@ -815,13 +815,13 @@ public class CommandProcessor {
 			return new String[0];
 		}
 		public String getDescription() {
-			return "Switches to using vanilla gamemode commands";
+			return "切换到使用原版游戏模式命令";
 		}
 		public boolean processCommand(String args) {
 			if (args.length() == 0) {
 				Config.getConfig().creativeCommand = "gamemode creative";
 				Config.getConfig().survivalCommand = "gamemode survival";
-				Util.showChatMessage("§6Now using vanilla gamemode commands");
+				Util.showChatMessage("§6现在使用原版游戏模式命令");
 				Config.saveConfigWithErrorHandling();
 				return true;
 			}
@@ -842,16 +842,16 @@ public class CommandProcessor {
 			return new String[0];
 		}
 		public String getDescription() {
-			return "Shows a fake player representing your true position when playing songs";
+			return "在播放歌曲时显示代表您真实位置的假玩家";
 		}
 		public boolean processCommand(String args) {
 			if (args.length() == 0) {
 				Config.getConfig().showFakePlayer = !Config.getConfig().showFakePlayer;
 				if (Config.getConfig().showFakePlayer) {
-					Util.showChatMessage("§6Enabled fake player");
+					Util.showChatMessage("§6已启用假玩家");
 				}
 				else {
-					Util.showChatMessage("§6Disabled fake player");
+					Util.showChatMessage("§6已禁用假玩家");
 				}
 				Config.saveConfigWithErrorHandling();
 				return true;
@@ -873,18 +873,18 @@ public class CommandProcessor {
 			return new String[]{"<DEFAULT | WIDE | SPHERICAL>"};
 		}
 		public String getDescription() {
-			return "Sets the type of noteblock stage to build";
+			return "设置要构建的音符盒舞台类型";
 		}
 		public boolean processCommand(String args) {
 			if (args.length() > 0) {
 				try {
 					Stage.StageType stageType = Stage.StageType.valueOf(args.toUpperCase(Locale.ROOT));
 					Config.getConfig().stageType = stageType;
-					Util.showChatMessage("§6Set stage type to §3" + stageType.name());
+					Util.showChatMessage("§6已将舞台类型设置为 §3" + stageType.name());
 					Config.saveConfigWithErrorHandling();
 				}
 				catch (IllegalArgumentException e) {
-					Util.showChatMessage("§cInvalid stage type");
+					Util.showChatMessage("§c无效的舞台类型");
 				}
 				return true;
 			}
@@ -913,7 +913,7 @@ public class CommandProcessor {
 			};
 		}
 		public String getDescription() {
-			return "Sets the block breaking speed in blocks/sec";
+			return "设置方块破坏速度（方块/秒）";
 		}
 		public boolean processCommand(String args) {
 			if (args.length() == 0) {
@@ -928,22 +928,22 @@ public class CommandProcessor {
 					try {
 						speed = Double.parseDouble(split[1]);
 					} catch (NumberFormatException e) {
-						Util.showChatMessage("§cSpeed must be a number");
+						Util.showChatMessage("§c速度必须是数字");
 						return true;
 					}
 					if (speed <= 0) {
-						Util.showChatMessage("§cSpeed must be greater than 0");
+						Util.showChatMessage("§c速度必须大于0");
 						return true;
 					}
 					Config.getConfig().breakSpeed = speed;
 					Config.saveConfigWithErrorHandling();
-					Util.showChatMessage("§6Set block breaking speed to §3" + Config.getConfig().breakSpeed + " §6blocks/sec");
+					Util.showChatMessage("§6已将方块破坏速度设置为 §3" + Config.getConfig().breakSpeed + " §6方块/秒");
 					return true;
 				case "reset":
 					if (split.length != 1) return false;
 					Config.getConfig().breakSpeed = 40;
 					Config.saveConfigWithErrorHandling();
-					Util.showChatMessage("§6Reset block breaking speed to §3" + Config.getConfig().breakSpeed + " §6blocks/sec");
+					Util.showChatMessage("§6已重置方块破坏速度为 §3" + Config.getConfig().breakSpeed + " §6方块/秒");
 					return true;
 				default:
 					return false;
@@ -973,7 +973,7 @@ public class CommandProcessor {
 			};
 		}
 		public String getDescription() {
-			return "Sets the block placement speed in blocks/sec";
+			return "设置方块放置速度（方块/秒）";
 		}
 		public boolean processCommand(String args) {
 			if (args.length() == 0) {
@@ -988,22 +988,22 @@ public class CommandProcessor {
 					try {
 						speed = Double.parseDouble(split[1]);
 					} catch (NumberFormatException e) {
-						Util.showChatMessage("§cSpeed must be a number");
+						Util.showChatMessage("§c速度必须是数字");
 						return true;
 					}
 					if (speed <= 0) {
-						Util.showChatMessage("§cSpeed must be greater than 0");
+						Util.showChatMessage("§c速度必须大于0");
 						return true;
 					}
 					Config.getConfig().placeSpeed = speed;
 					Config.saveConfigWithErrorHandling();
-					Util.showChatMessage("§6Set block placement speed to §3" + Config.getConfig().placeSpeed + " §6blocks/sec");
+					Util.showChatMessage("§6已将方块放置速度设置为 §3" + Config.getConfig().placeSpeed + " §6方块/秒");
 					return true;
 				case "reset":
 					if (split.length != 1) return false;
 					Config.getConfig().placeSpeed = 20;
 					Config.saveConfigWithErrorHandling();
-					Util.showChatMessage("§6Reset block placement speed to §3" + Config.getConfig().placeSpeed + " §6blocks/sec");
+					Util.showChatMessage("§6已重置方块放置速度为 §3" + Config.getConfig().placeSpeed + " §6方块/秒");
 					return true;
 				default:
 					return false;
@@ -1033,27 +1033,27 @@ public class CommandProcessor {
 			return new String[]{"<swing | rotate>"};
 		}
 		public String getDescription() {
-			return "Toggles different types of movements";
+			return "切换不同类型的移动";
 		}
 		public boolean processCommand(String args) {
 			switch (args.toLowerCase(Locale.ROOT)) {
 				case "swing":
 					Config.getConfig().swing = !Config.getConfig().swing;
 					if (Config.getConfig().swing) {
-						Util.showChatMessage("§6Enabled arm swinging");
+						Util.showChatMessage("§6已启用手臂摆动");
 					}
 					else {
-						Util.showChatMessage("§6Disabled arm swinging");
+						Util.showChatMessage("§6已禁用手臂摆动");
 					}
 					Config.saveConfigWithErrorHandling();
 					return true;
 				case "rotate":
 					Config.getConfig().rotate = !Config.getConfig().rotate;
 					if (Config.getConfig().rotate) {
-						Util.showChatMessage("§6Enabled player rotation");
+						Util.showChatMessage("§6已启用玩家旋转");
 					}
 					else {
-						Util.showChatMessage("§6Disabled player rotation");
+						Util.showChatMessage("§6已禁用玩家旋转");
 					}
 					Config.saveConfigWithErrorHandling();
 					return true;
@@ -1082,18 +1082,18 @@ public class CommandProcessor {
 			return new String[]{"<threshold>"};
 		}
 		public String getDescription() {
-			return "Sets the minimum velocity below which notes won't be played (applies to midi and nbs). This must be a number from 0 to 100. For song items, the threshold is baked in upon item creation.";
+			return "设置音符不被播放的最小速度阈值（适用于midi和nbs）。这个值必须是0到100之间的数字。对于歌曲物品，阈值在物品创建时就已经确定。";
 		}
 		public boolean processCommand(String args) {
 			if (args.length() > 0) {
 				try {
 					int threshold = Integer.parseInt(args);
 					if (threshold < 0 || threshold > 100) {
-						Util.showChatMessage("§cVelocity threshold must be a value between 0 and 100");
+						Util.showChatMessage("§c速度阈值必须是0到100之间的值");
 						return true;
 					}
 					Config.getConfig().velocityThreshold = threshold;
-					Util.showChatMessage("§6Set velocity threshold to " + threshold);
+					Util.showChatMessage("§6已将速度阈值设置为 " + threshold);
 					Config.saveConfigWithErrorHandling();
 					return true;
 				} catch (NumberFormatException e) {
@@ -1116,16 +1116,16 @@ public class CommandProcessor {
 			return new String[0];
 		}
 		public String getDescription() {
-			return "Toggles whether you automatically clean up your stage and restore the original blocks after playing";
+			return "切换在播放后是否自动清理舞台并恢复原始方块";
 		}
 		public boolean processCommand(String args) {
 			if (args.length() == 0) {
 				Config.getConfig().autoCleanup = !Config.getConfig().autoCleanup;
 				if (Config.getConfig().autoCleanup) {
-					Util.showChatMessage("§6Enabled automatic cleanup");
+					Util.showChatMessage("§6已启用自动清理");
 				}
 				else {
-					Util.showChatMessage("§6Disabled automatic cleanup");
+					Util.showChatMessage("§6已禁用自动清理");
 				}
 				Config.saveConfigWithErrorHandling();
 				return true;
@@ -1147,17 +1147,17 @@ public class CommandProcessor {
 			return new String[0];
 		}
 		public String getDescription() {
-			return "Cleans up your most recent stage and restores the original blocks";
+			return "清理您最近的舞台并恢复原始方块";
 		}
 		public boolean processCommand(String args) {
 			if (args.length() == 0) {
 				Stage lastStage = SongHandler.getInstance().lastStage;
 				if (!SongHandler.getInstance().isIdle()) {
-					Util.showChatMessage("§cYou cannot start cleanup if you are in the middle of another action");
+					Util.showChatMessage("§c如果您正在执行其他操作，无法开始清理");
 					return true;
 				}
 				if (lastStage == null || SongHandler.getInstance().originalBlocks.size() == 0 || !lastStage.serverIdentifier.equals(Util.getServerIdentifier())) {
-					Util.showChatMessage("§6There is nothing to clean up");
+					Util.showChatMessage("§6没有需要清理的内容");
 					return true;
 				}
 				if (MC.player.getPos().squaredDistanceTo(lastStage.getOriginBottomCenter()) > 3*3 || !lastStage.worldName.equals(Util.getWorldName())) {
@@ -1165,17 +1165,17 @@ public class CommandProcessor {
 							"%d %d %d",
 							lastStage.position.getX(), lastStage.position.getY(), lastStage.position.getZ()
 					);
-					Util.showChatMessage("§6You must be within §33 §6blocks of the center of your stage to start cleanup.");
+					Util.showChatMessage("§6您必须在舞台中心 §33 §6个方块范围内才能开始清理。");
 					MutableText coordText = Util.joinTexts(null,
-							Text.literal("This is at ").setStyle(Style.EMPTY.withColor(Formatting.GOLD)),
+							Text.literal("位置在 ").setStyle(Style.EMPTY.withColor(Formatting.GOLD)),
 							Text.literal(coordStr).setStyle(
 									Style.EMPTY
 											.withColor(Formatting.DARK_AQUA)
 											.withUnderline(true)
 											.withClickEvent(new ClickEvent.CopyToClipboard(coordStr))
-											.withHoverEvent(new HoverEvent.ShowText(Text.literal("Copy \"" + coordStr + "\"")))
+											.withHoverEvent(new HoverEvent.ShowText(Text.literal("复制 \"" + coordStr + "\"")))
 							),
-							Text.literal(" in world ").setStyle(Style.EMPTY.withColor(Formatting.GOLD)),
+							Text.literal(" 世界中 ").setStyle(Style.EMPTY.withColor(Formatting.GOLD)),
 							Text.literal(lastStage.worldName).setStyle(Style.EMPTY.withColor(Formatting.DARK_AQUA))
 					);
 					Util.showChatMessage(coordText);
@@ -1204,7 +1204,7 @@ public class CommandProcessor {
 			};
 		}
 		public String getDescription() {
-			return "Set an announcement message that is sent when you start playing a song. With setMessage, write [name] where the song name should go.";
+			return "设置在您开始播放歌曲时发送的公告消息。使用setMessage时，在歌曲名称应出现的位置写[name]。";
 		}
 		public boolean processCommand(String args) {
 			String[] split = args.split(" ", 2);
@@ -1212,23 +1212,23 @@ public class CommandProcessor {
 				case "enable":
 					if (split.length != 1) return false;
 					Config.getConfig().doAnnouncement = true;
-					Util.showChatMessage("§6Enabled song announcements");
+					Util.showChatMessage("§6已启用歌曲公告");
 					Config.saveConfigWithErrorHandling();
 					return true;
 				case "disable":
 					if (split.length != 1) return false;
 					Config.getConfig().doAnnouncement = false;
-					Util.showChatMessage("§6Disabled song announcements");
+					Util.showChatMessage("§6已禁用歌曲公告");
 					Config.saveConfigWithErrorHandling();
 					return true;
 				case "getmessage":
 					if (split.length != 1) return false;
-					Util.showChatMessage("§6Current announcement message is §r" + Config.getConfig().announcementMessage);
+					Util.showChatMessage("§6当前公告消息是 §r" + Config.getConfig().announcementMessage);
 					return true;
 				case "setmessage":
 					if (split.length != 2) return false;
 					Config.getConfig().announcementMessage = split[1];
-					Util.showChatMessage("§6Set announcement message to §r" + split[1]);
+					Util.showChatMessage("§6已将公告消息设置为 §r" + split[1]);
 					Config.saveConfigWithErrorHandling();
 					return true;
 				default:
@@ -1256,21 +1256,21 @@ public class CommandProcessor {
 			return new String[0];
 		}
 		public String getDescription() {
-			return "Enables or disables survival-only mode, in which automatic noteblock placement is disabled and automatic tuning is done by right-clicking.";
+			return "启用或禁用仅生存模式，在该模式下自动音符盒放置被禁用，自动调音通过右键点击完成。";
 		}
 		public boolean processCommand(String args) {
 			if (args.length() == 0) {
 				if (!SongHandler.getInstance().isIdle()) {
-					Util.showChatMessage("§cYou cannot change this setting while playing or building");
+					Util.showChatMessage("§c您不能在播放或构建时更改此设置");
 					return true;
 				}
 
 				Config.getConfig().survivalOnly = !Config.getConfig().survivalOnly;
 				if (Config.getConfig().survivalOnly) {
-					Util.showChatMessage("§6Enabled survival only mode");
+					Util.showChatMessage("§6已启用仅生存模式");
 				}
 				else {
-					Util.showChatMessage("§6Disabled survival only mode");
+					Util.showChatMessage("§6已禁用仅生存模式");
 				}
 				Config.saveConfigWithErrorHandling();
 				return true;
@@ -1292,16 +1292,16 @@ public class CommandProcessor {
 			return new String[0];
 		}
 		public String getDescription() {
-			return "Toggles flight noclip. When enabled, your local player can clip through blocks when flying while playing a song.";
+			return "切换飞行穿墙模式。启用时，您在播放歌曲时飞行可以穿过方块。";
 		}
 		public boolean processCommand(String args) {
 			if (args.length() == 0) {
 				Config.getConfig().flightNoclip = !Config.getConfig().flightNoclip;
 				if (Config.getConfig().flightNoclip) {
-					Util.showChatMessage("§6Enabled flight noclip");
+					Util.showChatMessage("§6已启用飞行穿墙模式");
 				}
 				else {
-					Util.showChatMessage("§6Disabled flight noclip");
+					Util.showChatMessage("§6已禁用飞行穿墙模式");
 				}
 				Config.saveConfigWithErrorHandling();
 				return true;
@@ -1326,7 +1326,7 @@ public class CommandProcessor {
 			};
 		}
 		public String getDescription() {
-			return "Assigns/edits song data for the item in your hand";
+			return "为手中物品分配/编辑歌曲数据";
 		}
 		public boolean processCommand(String args) {
 			if (args.length() == 0) {
@@ -1334,7 +1334,7 @@ public class CommandProcessor {
 			}
 
 			if (MC.interactionManager.getCurrentGameMode() != GameMode.CREATIVE) {
-				Util.showChatMessage("§cYou must be in creative mode to use this command");
+				Util.showChatMessage("§c您必须处于创造模式才能使用此命令");
 				return true;
 			}
 
@@ -1348,7 +1348,7 @@ public class CommandProcessor {
 					try {
 						(new SongItemCreatorThread(location)).start();
 					} catch (IOException e) {
-						Util.showChatMessage("§cError creating song item: §4" + e.getMessage());
+						Util.showChatMessage("§c创建歌曲物品时出错: §4" + e.getMessage());
 					}
 					return true;
 				case "setsongname":
@@ -1360,10 +1360,10 @@ public class CommandProcessor {
 						SongItemUtils.addSongItemDisplay(stack);
 						MC.player.setStackInHand(Hand.MAIN_HAND, stack);
 						MC.interactionManager.clickCreativeStack(MC.player.getStackInHand(Hand.MAIN_HAND), 36 + MC.player.getInventory().getSelectedSlot());
-						Util.showChatMessage("§6Set song display name to §3" + name);
+						Util.showChatMessage("§6已将歌曲显示名称设置为 §3" + name);
 						return true;
 					} else {
-						Util.showChatMessage("§cYou must be holding a song item");
+						Util.showChatMessage("§c您必须手持一个歌曲物品");
 						return true;
 					}
 				default:
@@ -1399,7 +1399,7 @@ public class CommandProcessor {
 			return new String[0];
 		}
 		public String getDescription() {
-			return "Creates a song for testing";
+			return "创建一首用于测试的歌曲";
 		}
 		public boolean processCommand(String args) {
 			if (args.length() == 0) {

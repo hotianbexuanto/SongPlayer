@@ -30,7 +30,7 @@ public class SongItemCreatorThread extends SongLoaderThread {
         try {
             songData = SPConverter.getBytesFromSong(song);
         } catch (IOException e) {
-            Util.showChatMessage("§cError creating song item: §4" + e.getMessage());
+            Util.showChatMessage("§c创建歌曲物品时出错: §4" + e.getMessage());
             return;
         }
         SongPlayer.MC.execute(() -> {
@@ -38,7 +38,7 @@ public class SongItemCreatorThread extends SongLoaderThread {
                 return;
             }
             if (!SongPlayer.MC.player.getInventory().getStack(slotId).equals(stack)) {
-                Util.showChatMessage("§cCould not create song item because item has moved");
+                Util.showChatMessage("§c无法创建歌曲物品，因为物品已移动");
             }
             ItemStack newStack;
             if (stack.isEmpty()) {
@@ -52,7 +52,7 @@ public class SongItemCreatorThread extends SongLoaderThread {
             newStack = SongItemUtils.createSongItem(newStack, songData, filename, song.name);
             SongPlayer.MC.player.getInventory().setStack(slotId, newStack);
             SongPlayer.MC.interactionManager.clickCreativeStack(SongPlayer.MC.player.getStackInHand(Hand.MAIN_HAND), 36 + slotId);
-            Util.showChatMessage(Text.literal("§6Successfully assigned song data to §3").append(newStack.getItem().getName()));
+            Util.showChatMessage(Text.literal("§6已成功将歌曲数据分配给 §3").append(newStack.getItem().getName()));
         });
     }
 }
