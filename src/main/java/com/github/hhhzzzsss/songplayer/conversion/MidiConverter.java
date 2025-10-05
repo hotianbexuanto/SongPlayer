@@ -19,6 +19,11 @@ import java.util.Collections;
 import java.util.HashMap;
 
 public class MidiConverter {
+
+	public interface ProgressCallback {
+		void onProgress(int percentage, int processed, int total);
+	}
+
 	public static final int SET_INSTRUMENT = 0xC0;
 	public static final int SET_TEMPO = 0x51;
 	public static final int NOTE_ON = 0x90;
@@ -38,12 +43,22 @@ public class MidiConverter {
 		Sequence sequence = MidiSystem.getSequence(new ByteArrayInputStream(bytes));
 		return getSong(sequence, name);
 	}
+
+	public static Song getSongFromBytes(byte[] bytes, String name, ProgressCallback progressCallback) throws InvalidMidiDataException, IOException {
+		Sequence sequence = MidiSystem.getSequence(new ByteArrayInputStream(bytes));
+		return getSong(sequence, name, progressCallback);
+	}
     
 	public static Song getSong(Sequence sequence, String name) {
+		return getSong(sequence, name, null);
+	}
+
+	public static Song getSong(Sequence sequence, String name, ProgressCallback progressCallback) {
 		Song song  = new Song(name);
-		
+
 		long tpq = sequence.getResolution();
-		
+
+		// 收集所有tempo事件
 		ArrayList<MidiEvent> tempoEvents = new ArrayList<>();
 		for (Track track : sequence.getTracks()) {
 			for (int i = 0; i < track.size(); i++) {
@@ -57,56 +72,99 @@ public class MidiConverter {
 				}
 			}
 		}
-		
-		Collections.sort(tempoEvents, (a, b) -> Long.compare(a.getTick(), b.getTick()));
-		
-		for (Track track : sequence.getTracks()) {
 
+		Collections.sort(tempoEvents, (a, b) -> Long.compare(a.getTick(), b.getTick()));
+
+		// 计算总事件数用于进度显示
+		int totalEvents = 0;
+		for (Track track : sequence.getTracks()) {
+			totalEvents += track.size();
+		}
+		int processedEvents = 0;
+
+		// 统计信息
+		int totalNotes = 0;
+		int convertedNotes = 0;
+		int skippedNotes = 0;
+
+		// 使用HashMap存储每个轨道和通道的乐器ID，去除16通道限制
+		HashMap<String, Integer> instrumentIds = new HashMap<>();
+
+		int trackIndex = 0;
+		for (Track track : sequence.getTracks()) {
 			long microTime = 0;
-			int[] instrumentIds = new int[16];
 			int mpq = 500000;
 			int tempoEventIdx = 0;
 			long prevTick = 0;
-			
+
 			for (int i = 0; i < track.size(); i++) {
 				MidiEvent event = track.get(i);
 				MidiMessage message = event.getMessage();
-				
+
+				// 更新tempo
 				while (tempoEventIdx < tempoEvents.size() && event.getTick() > tempoEvents.get(tempoEventIdx).getTick()) {
 					long deltaTick = tempoEvents.get(tempoEventIdx).getTick() - prevTick;
 					prevTick = tempoEvents.get(tempoEventIdx).getTick();
 					microTime += (mpq/tpq) * deltaTick;
-					
+
 					MetaMessage mm = (MetaMessage) tempoEvents.get(tempoEventIdx).getMessage();
 					byte[] data = mm.getData();
 					int new_mpq = (data[2]&0xFF) | ((data[1]&0xFF)<<8) | ((data[0]&0xFF)<<16);
 					if (new_mpq != 0) mpq = new_mpq;
 					tempoEventIdx++;
 				}
-				
+
 				if (message instanceof ShortMessage) {
 					ShortMessage sm = (ShortMessage) message;
+					String channelKey = trackIndex + "_" + sm.getChannel();
+
 					if (sm.getCommand() == SET_INSTRUMENT) {
-						instrumentIds[sm.getChannel()] = sm.getData1();
+						instrumentIds.put(channelKey, sm.getData1());
 					}
 					else if (sm.getCommand() == NOTE_ON) {
 						int pitch = sm.getData1();
 						int velocity = sm.getData2();
-						if (velocity == 0) continue; // Just ignore notes with velocity 0
-						velocity = (velocity * 100) / 127; // Midi velocity goes from 0-127
+
+						// 先计入总音符数
+						totalNotes++;
+
+						// 忽略velocity为0的音符（在MIDI中velocity=0相当于NOTE_OFF）
+						if (velocity == 0) {
+							skippedNotes++;
+							continue;
+						}
+
+						// 转换velocity: MIDI范围0-127 -> Minecraft范围0-100
+						velocity = (velocity * 100) / 127;
+
+						// 如果转换后velocity为0，也跳过（没有声音）
+						if (velocity == 0) {
+							skippedNotes++;
+							continue;
+						}
+
 						long deltaTick = event.getTick() - prevTick;
 						prevTick = event.getTick();
 						microTime += (mpq/tpq) * deltaTick;
 
-						Note note;
+						Note note = null;
 						if (sm.getChannel() == 9) {
+							// 打击乐通道
 							note = getMidiPercussionNote(pitch, velocity, microTime);
 						}
 						else {
-							note = getMidiInstrumentNote(instrumentIds[sm.getChannel()], pitch, velocity, microTime);
+							// 旋律乐器通道
+							int instrumentId = instrumentIds.getOrDefault(channelKey, 0);
+							note = getMidiInstrumentNote(instrumentId, pitch, velocity, microTime);
 						}
+
+						// 只添加成功转换的音符
 						if (note != null) {
 							song.add(note);
+							convertedNotes++;
+						} else {
+							// 无法转换的音符（超出Minecraft音符盒范围或无对应乐器）
+							skippedNotes++;
 						}
 
 						long time = microTime / 1000L;
@@ -124,8 +182,32 @@ public class MidiConverter {
 						}
 					}
 				}
+
+				// 更新进度
+				processedEvents++;
+				if (progressCallback != null && processedEvents % 100 == 0) {
+					int progress = (int) ((processedEvents * 100.0) / totalEvents);
+					progressCallback.onProgress(progress, processedEvents, totalEvents);
+
+					// 定期让出CPU时间，避免阻塞游戏主线程
+					if (processedEvents % 1000 == 0) {
+						Thread.yield();
+					}
+				}
 			}
+
+			trackIndex++;
 		}
+
+		// 最终进度更新，包含统计信息
+		if (progressCallback != null) {
+			progressCallback.onProgress(100, totalEvents, totalEvents);
+		}
+
+		// 存储转换统计信息到Song对象（如果需要）
+		song.conversionStats = String.format("总音符: %d, 已转换: %d, 已跳过: %d (%.1f%%)",
+			totalNotes, convertedNotes, skippedNotes,
+			totalNotes > 0 ? (skippedNotes * 100.0 / totalNotes) : 0);
 
 		song.sort();
 

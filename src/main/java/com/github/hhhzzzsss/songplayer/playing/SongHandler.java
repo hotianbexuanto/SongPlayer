@@ -176,6 +176,20 @@ public class SongHandler {
         else {
             try {
                 loaderThread = new SongLoaderThread(location);
+
+                // 添加进度监听器（只在进度百分比变化时显示，避免刷屏）
+                loaderThread.setProgressListener((percentage, stage) -> {
+                    if (percentage >= 0 && percentage <= 100) {
+                        // 只显示关键进度节点：每5%或100%
+                        if (percentage % 5 == 0 || percentage == 100) {
+                            Util.showChatMessage(String.format("§6[%d%%] §3%s", percentage, stage));
+                        }
+                    } else if (percentage < 0) {
+                        // 错误情况
+                        Util.showChatMessage("§c" + stage);
+                    }
+                });
+
                 Util.showChatMessage("§6正在加载 §3" + location);
                 loaderThread.start();
             } catch (IOException e) {

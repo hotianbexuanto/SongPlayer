@@ -159,6 +159,11 @@ public class NBSConverter {
                 layerVolume = nbsLayers.get(note.layer).volume;
             }
 
+            // 跳过音量为0的音符（没有声音）
+            if (layerVolume == 0 || note.velocity == 0) {
+                continue;
+            }
+
             int pitch = note.key-33;
             int noteId = pitch + instrument.instrumentId*25;
             song.add(new Note(noteId, getMilliTime(note.tick, tempo), layerVolume));

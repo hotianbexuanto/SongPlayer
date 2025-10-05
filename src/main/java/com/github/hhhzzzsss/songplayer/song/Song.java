@@ -16,7 +16,8 @@ public class Song {
 	public long loopPosition = 0; // Milliseconds into the song to start looping
 	public int loopCount = 0; // Number of times to loop
 	public int currentLoop = 0; // Number of loops so far
-	
+	public String conversionStats = ""; // MIDI转换统计信息
+
 	public Song(String name) {
 		this.name = name;
 	}
